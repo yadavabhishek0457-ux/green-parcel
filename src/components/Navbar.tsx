@@ -1,4 +1,5 @@
-import { ShoppingCart, Search, MapPin, User, Sprout } from 'lucide-react';
+import { ShoppingCart, Search, MapPin, User } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface NavbarProps {
   cartCount: number;
@@ -12,19 +13,22 @@ export function Navbar({ cartCount, onCartClick }: NavbarProps) {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center cursor-pointer gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-lg shadow-emerald-200 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
-              <Sprout className="w-6 h-6" strokeWidth={2.5} />
-            </div>
+            <BrandLogo className="w-12 h-12 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-lg shadow-emerald-200" />
             <span className="text-2xl font-extrabold tracking-tight text-slate-800">
               Green<span className="text-emerald-500 font-medium">Parcel</span>
             </span>
+          </div>
+
+          <div className="hidden lg:flex items-center space-x-8 ml-10">
+            <a href="#about-us" className="text-sm font-bold text-gray-600 hover:text-emerald-600 transition-colors">Hamari Kahani</a>
+            <a href="#" className="text-sm font-bold text-gray-600 hover:text-emerald-600 transition-colors">Combo Packs</a>
           </div>
 
           {/* Location & Search (Desktop) */}
           <div className="hidden md:flex flex-1 items-center justify-center px-8">
             <div className="flex items-center text-sm text-gray-600 mr-6 cursor-pointer hover:text-[#4CAF50] bg-gray-50 px-3 py-2 rounded-lg border border-gray-100 transition-colors">
               <MapPin className="h-4 w-4 mr-1.5 text-[#4CAF50]" />
-              <span>Deliver to <strong className="text-gray-900">Jabalpur, Madhya Pradesh</strong></span>
+              <span>Deliver to <strong className="text-gray-900">Jabalpur</strong></span>
             </div>
             <div className="max-w-lg w-full relative group">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -32,7 +36,7 @@ export function Navbar({ cartCount, onCartClick }: NavbarProps) {
               </div>
               <input
                 className="block w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-[#4CAF50] sm:text-sm transition-all"
-                placeholder="Search for fresh vegetables and fruits..."
+                placeholder="Search for Fresh Bhindi..."
                 type="search"
               />
             </div>

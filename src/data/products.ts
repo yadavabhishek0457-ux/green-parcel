@@ -1,3 +1,11 @@
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  userName: string;
+  date: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -12,7 +20,7 @@ export const products: Product[] = [
   {
     id: '1',
     name: 'Potato (Jyoti)',
-    category: 'Daily Staples',
+    category: 'Vegetables',
     quantity: '1 kg',
     mrp: 28,
     greenPrice: 22,
@@ -21,7 +29,7 @@ export const products: Product[] = [
   {
     id: '2',
     name: 'Onion (Nashik)',
-    category: 'Daily Staples',
+    category: 'Vegetables',
     quantity: '1 kg',
     mrp: 35,
     greenPrice: 28,
@@ -29,9 +37,9 @@ export const products: Product[] = [
   },
   {
     id: '3',
-    name: 'Tomato (Hybrid)',
-    category: 'Daily Staples',
-    quantity: '1 kg',
+    name: 'Fresh Red Tomatoes',
+    category: 'Vegetables',
+    quantity: '500g',
     mrp: 40,
     greenPrice: 30,
     imageUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=80',
@@ -75,7 +83,7 @@ export const products: Product[] = [
   {
     id: '8',
     name: 'Broccoli',
-    category: 'Exotic Fruits',
+    category: 'Exotic',
     quantity: '500g',
     mrp: 120,
     greenPrice: 90,
@@ -84,7 +92,7 @@ export const products: Product[] = [
   {
     id: '9',
     name: 'Avocado',
-    category: 'Exotic Fruits',
+    category: 'Exotic',
     quantity: '1 unit',
     mrp: 150,
     greenPrice: 120,
@@ -93,7 +101,7 @@ export const products: Product[] = [
   {
     id: '10',
     name: 'Carrot (Local)',
-    category: 'Root Vegetables',
+    category: 'Vegetables',
     quantity: '500g',
     mrp: 35,
     greenPrice: 25,
@@ -102,20 +110,20 @@ export const products: Product[] = [
   {
     id: '11',
     name: 'Cauliflower',
-    category: 'Daily Staples',
+    category: 'Vegetables',
     quantity: '1 unit',
     mrp: 50,
     greenPrice: 40,
     imageUrl: 'https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?auto=format&fit=crop&w=500&q=80',
   },
   {
-    id: '12',
-    name: 'Cabbage',
-    category: 'Leafy Greens',
-    quantity: '1 unit',
-    mrp: 45,
-    greenPrice: 35,
-    imageUrl: 'https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?auto=format&fit=crop&w=500&q=80',
+    id: '21',
+    name: 'Weekly Veggie Box',
+    category: 'Combos',
+    quantity: '5 kg Assorted',
+    mrp: 500,
+    greenPrice: 449,
+    imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=500&q=80',
   },
   {
     id: '18',
@@ -129,7 +137,7 @@ export const products: Product[] = [
   {
     id: '19',
     name: 'Watermelon',
-    category: 'Seasonal Specials',
+    category: 'Fruits',
     quantity: '1 unit',
     mrp: 80,
     greenPrice: 60,

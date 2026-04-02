@@ -1,36 +1,51 @@
+import { Carrot, Apple, Package, Sparkles, Leaf } from 'lucide-react';
+
 interface CategoryNavProps {
   categories: string[];
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
 }
 
+const categoryIcons: Record<string, any> = {
+  'Vegetables': Carrot,
+  'Fruits': Apple,
+  'Combos': Package,
+  'Exotic': Sparkles,
+  'Leafy Greens': Leaf,
+  'All': null
+};
+
 export function CategoryNav({ categories, selectedCategory, onSelectCategory }: CategoryNavProps) {
+  const allCategories = ['All', ...categories];
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-      <div className="flex space-x-3 overflow-x-auto pb-4 scrollbar-hide snap-x">
-        <button
-          onClick={() => onSelectCategory('All')}
-          className={`snap-start whitespace-nowrap px-6 py-2.5 rounded-full font-bold transition-all duration-200 ${
-            selectedCategory === 'All'
-              ? 'bg-[#4CAF50] text-white shadow-md shadow-green-200 scale-105'
-              : 'bg-white text-gray-600 hover:bg-green-50 hover:text-green-700 border border-gray-200'
-          }`}
-        >
-          All Items
-        </button>
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => onSelectCategory(category)}
-            className={`snap-start whitespace-nowrap px-6 py-2.5 rounded-full font-bold transition-all duration-200 ${
-              selectedCategory === category
-                ? 'bg-[#4CAF50] text-white shadow-md shadow-green-200 scale-105'
-                : 'bg-white text-gray-600 hover:bg-green-50 hover:text-green-700 border border-gray-200'
-            }`}
-          >
-            {category}
-          </button>
-        ))}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+      <div className="flex space-x-6 overflow-x-auto pb-6 scrollbar-hide snap-x justify-start md:justify-center">
+        {allCategories.map((category) => {
+          const Icon = categoryIcons[category];
+          const isActive = selectedCategory === category;
+
+          return (
+            <button
+              key={category}
+              onClick={() => onSelectCategory(category)}
+              className={`snap-start flex flex-col items-center gap-3 transition-all duration-300 group min-w-[100px]`}
+            >
+              <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm border ${
+                isActive 
+                  ? 'bg-[#4CAF50] text-white border-green-600 scale-110 shadow-lg shadow-green-100' 
+                  : 'bg-white text-gray-500 border-gray-100 hover:border-green-200 hover:bg-green-50 hover:text-[#4CAF50]'
+              }`}>
+                {Icon ? <Icon className="w-8 h-8 sm:w-10 sm:h-10" /> : <div className="font-bold text-lg">All</div>}
+              </div>
+              <span className={`text-sm font-bold transition-colors ${
+                isActive ? 'text-[#4CAF50]' : 'text-gray-600 group-hover:text-[#4CAF50]'
+              }`}>
+                {category === 'All' ? 'All Items' : category}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

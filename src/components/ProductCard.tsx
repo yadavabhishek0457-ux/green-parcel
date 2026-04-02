@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus, Star } from 'lucide-react';
 import { Product } from '../data/products';
 
 export interface ProductCardProps {
@@ -7,14 +7,28 @@ export interface ProductCardProps {
   cartQuantity: number;
   onAddToCart: (product: Product) => void;
   onRemoveFromCart: (productId: string) => void;
+  onProductClick: (product: Product) => void;
+  averageRating: number;
+  reviewCount: number;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, cartQuantity, onAddToCart, onRemoveFromCart }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ 
+  product, 
+  cartQuantity, 
+  onAddToCart, 
+  onRemoveFromCart,
+  onProductClick,
+  averageRating,
+  reviewCount
+}) => {
   const discountPercentage = Math.round(((product.mrp - product.greenPrice) / product.mrp) * 100);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:shadow-green-900/5 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
-      <div className="relative pt-[75%] overflow-hidden">
+      <div 
+        className="relative pt-[75%] overflow-hidden cursor-pointer"
+        onClick={() => onProductClick(product)}
+      >
         <img
           src={product.imageUrl}
           alt={product.name}
@@ -29,8 +43,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, cartQuantity,
       </div>
       
       <div className="p-4 flex flex-col flex-grow">
-        <div className="text-xs font-medium text-[#4CAF50] mb-1.5 uppercase tracking-wide">{product.category}</div>
-        <h3 className="font-bold text-gray-900 mb-1 line-clamp-2 leading-tight">{product.name}</h3>
+        <div className="flex justify-between items-start mb-1.5">
+          <div className="text-xs font-medium text-[#4CAF50] uppercase tracking-wide">{product.category}</div>
+          {reviewCount > 0 && (
+            <div className="flex items-center text-xs font-bold text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded">
+              <Star className="w-3 h-3 text-yellow-400 fill-current mr-1" />
+              {averageRating.toFixed(1)}
+            </div>
+          )}
+        </div>
+        <h3 
+          className="font-bold text-gray-900 mb-1 line-clamp-2 leading-tight cursor-pointer hover:text-green-700 transition-colors"
+          onClick={() => onProductClick(product)}
+        >
+          {product.name}
+        </h3>
         <div className="text-sm text-gray-500 mb-4 font-medium">{product.quantity}</div>
         
         <div className="mt-auto flex items-end justify-between">

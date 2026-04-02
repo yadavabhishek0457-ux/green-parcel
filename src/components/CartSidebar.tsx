@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Plus, Minus, ShoppingBag, MapPin, CreditCard, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, MapPin, CreditCard, ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { Product } from '../data/products';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -14,14 +14,16 @@ interface CartSidebarProps {
   onAddToCart: (product: Product) => void;
   onRemoveFromCart: (productId: string) => void;
   onClearCart: () => void;
+  onPolicyClick: (type: 'return' | 'privacy') => void;
 }
 
 type CheckoutStep = 'cart' | 'checkout' | 'success';
 
-export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveFromCart, onClearCart }: CartSidebarProps) {
+export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveFromCart, onClearCart, onPolicyClick }: CartSidebarProps) {
   const [step, setStep] = useState<CheckoutStep>('cart');
   const [address, setAddress] = useState('');
   const [billingOption, setBillingOption] = useState('cod');
+  const [isAgreed, setIsAgreed] = useState(false);
 
   const handleClose = () => {
     onClose();
@@ -31,6 +33,7 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
         onClearCart();
         setAddress('');
         setBillingOption('cod');
+        setIsAgreed(false);
       }
     }, 300);
   };
@@ -212,17 +215,41 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                       <span>Total to Pay</span>
                       <span>₹{finalTotal}</span>
                     </div>
+
+                    {/* Trust Badge */}
+                    <div className="flex items-center justify-center gap-2 mb-4 bg-green-50 py-2 rounded-lg border border-green-100">
+                      <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                      <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">100% Freshness Guaranteed or Money Back</span>
+                    </div>
+
+                    {/* Policy Agreement */}
+                    <div className="mb-4">
+                      <label className="flex items-start cursor-pointer group">
+                        <div className="relative flex items-center">
+                          <input 
+                            type="checkbox" 
+                            checked={isAgreed}
+                            onChange={(e) => setIsAgreed(e.target.checked)}
+                            className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                          />
+                        </div>
+                        <span className="ml-2 text-xs text-gray-500 leading-tight">
+                          I agree to the <button onClick={() => onPolicyClick('return')} className="text-emerald-600 font-bold hover:underline">Return & Refund Policy</button>
+                        </span>
+                      </label>
+                    </div>
+
                     <div className="space-y-3">
                       <button 
                         onClick={handlePlaceOrder}
-                        disabled={!address.trim()}
+                        disabled={!address.trim() || !isAgreed}
                         className="w-full bg-[#4CAF50] text-white py-3 rounded-xl font-bold text-lg hover:bg-green-600 transition-colors shadow-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Place Order
                       </button>
                       <button 
                         onClick={() => {
-                          const phoneNumber = "919876543210"; // Replace with actual business number
+                          const phoneNumber = "919770883796"; // Updated business number
                           let message = "Hi, I would like to place an order:%0A%0A";
                           cartItems.forEach(item => {
                             message += `${item.cartQuantity}x ${item.name} - ₹${item.greenPrice * item.cartQuantity}%0A`;
@@ -234,7 +261,7 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                           window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
                           setStep('success');
                         }}
-                        disabled={!address.trim()}
+                        disabled={!address.trim() || !isAgreed}
                         className="w-full bg-[#25D366] text-white py-3 rounded-xl font-bold text-lg hover:bg-[#128C7E] transition-colors shadow-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <svg className="w-5 h-5 mr-2 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
