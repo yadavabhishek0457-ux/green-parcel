@@ -7,7 +7,7 @@ export function HeroBanner() {
       <div className="absolute inset-0">
         <img
           className="h-full w-full object-cover"
-          src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1920&q=80"
+          src="https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=1920&q=80"
           alt="Fresh vegetables and fruits background"
         />
         {/* Gradient Overlay for text readability */}

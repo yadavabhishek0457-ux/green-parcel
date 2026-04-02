@@ -85,7 +85,7 @@ export default function App() {
   }, [cart]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans">
+    <div className="min-h-screen bg-gradient-to-b from-brand-mint/50 via-white to-white font-sans">
       <Navbar cartCount={cartItemsCount} onCartClick={() => setIsCartOpen(true)} />
       
       <main className="pb-24">
