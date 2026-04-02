@@ -1,4 +1,4 @@
-import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 export function HeroBanner() {
   return (
@@ -24,24 +24,9 @@ export function HeroBanner() {
             <span className="block">Farm fresh to</span>
             <span className="block text-[#4CAF50] mt-1">your doorstep</span>
           </h1>
-          <p className="mt-4 text-base text-gray-700 sm:mt-5 sm:text-lg md:mt-5 md:text-xl font-semibold drop-shadow-sm">
+          <p className="mt-4 text-base text-blue-700 sm:mt-5 sm:text-lg md:mt-5 md:text-xl font-bold drop-shadow-sm">
             Quality wahi, jo ek maa chunti hai
           </p>
-          <div className="mt-8 sm:mt-10 sm:flex sm:justify-center lg:justify-start gap-4">
-            <a
-              href="#"
-              className="w-full sm:w-auto flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-bold rounded-xl text-white bg-[#4CAF50] hover:bg-green-600 shadow-lg shadow-green-200 transition-all hover:-translate-y-0.5"
-            >
-              Shop Now
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </a>
-            <a
-              href="#"
-              className="mt-3 sm:mt-0 w-full sm:w-auto flex items-center justify-center px-8 py-3.5 border-2 border-green-600 text-base font-bold rounded-xl text-green-700 bg-white/80 backdrop-blur-sm hover:bg-green-50 transition-all"
-            >
-              View Offers
-            </a>
-          </div>
         </div>
       </div>
     </div>
