@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Plus, Minus, ShoppingBag, MapPin, CreditCard, ArrowLeft, CheckCircle2, ShieldCheck, User, Phone, Banknote, Receipt, Globe } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, MapPin, CreditCard, ArrowLeft, CheckCircle2, ShieldCheck, User, Phone, Banknote, Receipt, Globe, Smartphone } from 'lucide-react';
 import { Product } from '../data/products';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -30,7 +30,7 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [address, setAddress] = useState('');
-  const [billingOption, setBillingOption] = useState('cod');
+  const [billingOption, setBillingOption] = useState('upi');
   const [isAgreed, setIsAgreed] = useState(false);
 
   const handleClose = () => {
@@ -59,17 +59,28 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
   };
 
   const handlePlaceOrder = () => {
-    if (billingOption === 'online') {
-      handleRazorpayPayment();
+    if (billingOption === 'online' || billingOption === 'upi') {
+      handleRazorpayPayment(billingOption === 'upi' ? 'upi' : undefined);
       return;
     }
     
     sendWhatsAppOrder('PENDING (COD)');
   };
 
-  const handleRazorpayPayment = () => {
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+  const handleRazorpayPayment = (method?: string) => {
+    if (!window.Razorpay) {
+      alert("Payment gateway is still loading. Please try again in a moment.");
+      return;
+    }
+
+    const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    if (!razorpayKey) {
+      alert("Payment configuration is missing. Please set VITE_RAZORPAY_KEY_ID in the environment variables.");
+      return;
+    }
+
+    const options: any = {
+      key: razorpayKey,
       amount: finalTotal * 100, // amount in the smallest currency unit
       currency: "INR",
       name: "Fresh Grocery Store",
@@ -77,20 +88,51 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
       image: "https://picsum.photos/seed/grocery/200/200",
       handler: function (response: any) {
         if (response.razorpay_payment_id) {
-          sendWhatsAppOrder('PAID (ONLINE)', response.razorpay_payment_id);
+          sendWhatsAppOrder(`PAID (${method ? method.toUpperCase() : 'ONLINE'})`, response.razorpay_payment_id);
         }
       },
       prefill: {
         name: customerName,
         contact: customerPhone,
+        email: "customer@example.com", // Razorpay often requires email for UPI
+        method: method,
       },
       theme: {
         color: "#4CAF50",
       },
     };
 
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+    if (method === 'upi') {
+      options.config = {
+        display: {
+          blocks: {
+            upi: {
+              name: "Pay via UPI",
+              instruments: [
+                {
+                  method: "upi"
+                }
+              ]
+            }
+          },
+          sequence: ["block.upi"],
+          preferences: {
+            show_default_blocks: false // Focuses only on UPI
+          }
+        }
+      };
+    }
+
+    try {
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+        alert(`Payment Failed: ${response.error.description}`);
+      });
+      rzp.open();
+    } catch (error) {
+      console.error("Razorpay Error:", error);
+      alert("Failed to open payment gateway. Please try again.");
+    }
   };
 
   const sendWhatsAppOrder = (paymentStatus: string, paymentId?: string) => {
@@ -219,7 +261,7 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                   exit={{ opacity: 0, x: -20 }}
                   className="flex-1 flex flex-col overflow-hidden"
                 >
-                  <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-gray-50/50">
+                  <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-4 md:space-y-6 bg-gray-50/50">
                     {/* Mini Order Summary */}
                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                       <h3 className="font-bold text-gray-800 mb-3 flex items-center text-sm uppercase tracking-wider">
@@ -242,12 +284,12 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                     </div>
 
                     {/* Delivery Details Section */}
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100">
                       <h3 className="font-bold text-gray-800 mb-4 flex items-center text-sm uppercase tracking-wider">
                         <MapPin className="w-4 h-4 mr-2 text-[#4CAF50]" />
                         Delivery Details
                       </h3>
-                      <div className="space-y-4">
+                      <div className="space-y-3 md:space-y-4">
                         <div className="relative">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <User className="h-4 w-4 text-gray-400" />
@@ -257,7 +299,7 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                             value={customerName}
                             onChange={(e) => setCustomerName(e.target.value)}
                             placeholder="Full Name"
-                            className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-colors"
+                            className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-base focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-colors"
                           />
                         </div>
                         <div className="relative">
@@ -269,7 +311,7 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                             value={customerPhone}
                             onChange={(e) => setCustomerPhone(e.target.value)}
                             placeholder="Phone Number"
-                            className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-colors"
+                            className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-base focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-colors"
                           />
                         </div>
                         <div className="relative">
@@ -277,21 +319,40 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                             value={address}
                             onChange={(e) => setAddress(e.target.value)}
                             placeholder="Complete Delivery Address (House No, Building, Street, Area)"
-                            className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none h-24 bg-gray-50 focus:bg-white transition-colors"
+                            className="w-full border border-gray-200 rounded-xl p-3 text-base focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none h-24 bg-gray-50 focus:bg-white transition-colors"
                           />
                         </div>
                       </div>
                     </div>
 
                     {/* Billing Option Section */}
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100">
                       <h3 className="font-bold text-gray-800 mb-4 flex items-center text-sm uppercase tracking-wider">
                         <CreditCard className="w-4 h-4 mr-2 text-[#4CAF50]" />
                         Payment Method
                       </h3>
-                      <div className="space-y-3">
-                        <label className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${billingOption === 'cod' ? 'border-[#4CAF50] bg-green-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}>
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 ${billingOption === 'cod' ? 'border-[#4CAF50]' : 'border-gray-300'}`}>
+                      <div className="space-y-2 md:space-y-3">
+                        <label className={`flex items-center p-3 md:p-4 border-2 rounded-xl cursor-pointer transition-all ${billingOption === 'upi' ? 'border-[#4CAF50] bg-green-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 shrink-0 ${billingOption === 'upi' ? 'border-[#4CAF50]' : 'border-gray-300'}`}>
+                            {billingOption === 'upi' && <div className="w-2.5 h-2.5 bg-[#4CAF50] rounded-full" />}
+                          </div>
+                          <input 
+                            type="radio" 
+                            name="billing" 
+                            value="upi" 
+                            checked={billingOption === 'upi'}
+                            onChange={() => setBillingOption('upi')}
+                            className="hidden"
+                          />
+                          <div className="flex-1">
+                            <span className="block text-sm font-bold text-gray-900">UPI Payment</span>
+                            <span className="block text-xs text-gray-500 mt-0.5">Google Pay, PhonePe, Paytm</span>
+                          </div>
+                          <Smartphone className={`w-5 h-5 md:w-6 md:h-6 shrink-0 ${billingOption === 'upi' ? 'text-[#4CAF50]' : 'text-gray-400'}`} />
+                        </label>
+
+                        <label className={`flex items-center p-3 md:p-4 border-2 rounded-xl cursor-pointer transition-all ${billingOption === 'cod' ? 'border-[#4CAF50] bg-green-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 shrink-0 ${billingOption === 'cod' ? 'border-[#4CAF50]' : 'border-gray-300'}`}>
                             {billingOption === 'cod' && <div className="w-2.5 h-2.5 bg-[#4CAF50] rounded-full" />}
                           </div>
                           <input 
@@ -306,11 +367,11 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                             <span className="block text-sm font-bold text-gray-900">Cash on Delivery</span>
                             <span className="block text-xs text-gray-500 mt-0.5">Pay when your order arrives</span>
                           </div>
-                          <Banknote className={`w-6 h-6 ${billingOption === 'cod' ? 'text-[#4CAF50]' : 'text-gray-400'}`} />
+                          <Banknote className={`w-5 h-5 md:w-6 md:h-6 shrink-0 ${billingOption === 'cod' ? 'text-[#4CAF50]' : 'text-gray-400'}`} />
                         </label>
 
-                        <label className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${billingOption === 'online' ? 'border-[#4CAF50] bg-green-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}>
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 ${billingOption === 'online' ? 'border-[#4CAF50]' : 'border-gray-300'}`}>
+                        <label className={`flex items-center p-3 md:p-4 border-2 rounded-xl cursor-pointer transition-all ${billingOption === 'online' ? 'border-[#4CAF50] bg-green-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 shrink-0 ${billingOption === 'online' ? 'border-[#4CAF50]' : 'border-gray-300'}`}>
                             {billingOption === 'online' && <div className="w-2.5 h-2.5 bg-[#4CAF50] rounded-full" />}
                           </div>
                           <input 
@@ -323,17 +384,17 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                           />
                           <div className="flex-1">
                             <span className="block text-sm font-bold text-gray-900">Pay Online</span>
-                            <span className="block text-xs text-gray-500 mt-0.5">UPI, Cards, Netbanking</span>
+                            <span className="block text-xs text-gray-500 mt-0.5">Cards, Netbanking</span>
                           </div>
-                          <Globe className={`w-6 h-6 ${billingOption === 'online' ? 'text-[#4CAF50]' : 'text-gray-400'}`} />
+                          <Globe className={`w-5 h-5 md:w-6 md:h-6 shrink-0 ${billingOption === 'online' ? 'text-[#4CAF50]' : 'text-gray-400'}`} />
                         </label>
                       </div>
                     </div>
                   </div>
 
                   {/* Place Order Footer */}
-                  <div className="bg-white border-t p-5 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] z-10">
-                    <div className="space-y-2 mb-4">
+                  <div className="bg-white border-t p-4 md:p-5 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] z-10">
+                    <div className="space-y-1.5 md:space-y-2 mb-3 md:mb-4">
                       <div className="flex justify-between text-sm text-gray-500">
                         <span>Item Total</span>
                         <span>₹{itemTotal}</span>
@@ -344,22 +405,22 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                           {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}
                         </span>
                       </div>
-                      <div className="border-t border-dashed border-gray-200 pt-2 mt-2 flex justify-between font-black text-xl text-gray-900">
+                      <div className="border-t border-dashed border-gray-200 pt-2 mt-2 flex justify-between font-black text-lg md:text-xl text-gray-900">
                         <span>To Pay</span>
                         <span className="text-[#4CAF50]">₹{finalTotal}</span>
                       </div>
                     </div>
 
                     {/* Trust Badge */}
-                    <div className="flex items-center justify-center gap-2 mb-4 bg-green-50/80 py-2.5 rounded-xl border border-green-100/50">
+                    <div className="flex items-center justify-center gap-2 mb-3 bg-green-50/80 py-2 rounded-xl border border-green-100/50">
                       <ShieldCheck className="w-4 h-4 text-emerald-500" />
                       <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">100% Freshness Guaranteed</span>
                     </div>
 
                     {/* Policy Agreement */}
-                    <div className="mb-5">
+                    <div className="mb-3 md:mb-4">
                       <label className="flex items-start cursor-pointer group">
-                        <div className="relative flex items-center mt-0.5">
+                        <div className="relative flex items-center mt-0.5 shrink-0">
                           <input 
                             type="checkbox" 
                             checked={isAgreed}
@@ -377,7 +438,7 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                       <button 
                         onClick={handlePlaceOrder}
                         disabled={!customerName.trim() || !customerPhone.trim() || !address.trim() || !isAgreed}
-                        className="w-full bg-gradient-to-r from-[#4CAF50] to-emerald-600 text-white py-4 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/30 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transform active:scale-[0.98]"
+                        className="w-full bg-gradient-to-r from-[#4CAF50] to-emerald-600 text-white py-3.5 md:py-4 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/30 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transform active:scale-[0.98]"
                       >
                         Confirm & Place Order
                       </button>
