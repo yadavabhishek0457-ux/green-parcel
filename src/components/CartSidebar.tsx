@@ -1,7 +1,13 @@
 import { useState } from 'react';
-import { X, Plus, Minus, ShoppingBag, MapPin, CreditCard, ArrowLeft, CheckCircle2, ShieldCheck, User, Phone, Banknote, Receipt } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, MapPin, CreditCard, ArrowLeft, CheckCircle2, ShieldCheck, User, Phone, Banknote, Receipt, Globe } from 'lucide-react';
 import { Product } from '../data/products';
 import { motion, AnimatePresence } from 'motion/react';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export interface CartItem extends Product {
   cartQuantity: number;
@@ -53,6 +59,41 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
   };
 
   const handlePlaceOrder = () => {
+    if (billingOption === 'online') {
+      handleRazorpayPayment();
+      return;
+    }
+    
+    sendWhatsAppOrder('PENDING (COD)');
+  };
+
+  const handleRazorpayPayment = () => {
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: finalTotal * 100, // amount in the smallest currency unit
+      currency: "INR",
+      name: "Fresh Grocery Store",
+      description: "Order Payment",
+      image: "https://picsum.photos/seed/grocery/200/200",
+      handler: function (response: any) {
+        if (response.razorpay_payment_id) {
+          sendWhatsAppOrder('PAID (ONLINE)', response.razorpay_payment_id);
+        }
+      },
+      prefill: {
+        name: customerName,
+        contact: customerPhone,
+      },
+      theme: {
+        color: "#4CAF50",
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+
+  const sendWhatsAppOrder = (paymentStatus: string, paymentId?: string) => {
     const phoneNumber = "919770883796";
     let message = "📦 *NEW ORDER CONFIRMED*%0A%0A";
     
@@ -68,7 +109,10 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
     
     message += `%0A💰 *Total Amount:* ₹${finalTotal}%0A`;
     message += `💳 *Payment Method:* ${billingOption.toUpperCase()}%0A`;
-    message += `⏳ *Payment Status:* PENDING (COD)%0A`;
+    message += `⏳ *Payment Status:* ${paymentStatus}%0A`;
+    if (paymentId) {
+      message += `🆔 *Payment ID:* ${paymentId}%0A`;
+    }
     
     message += `%0A_Quality wahi, jo ek Maa chunti hai._`;
     
@@ -263,6 +307,25 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                             <span className="block text-xs text-gray-500 mt-0.5">Pay when your order arrives</span>
                           </div>
                           <Banknote className={`w-6 h-6 ${billingOption === 'cod' ? 'text-[#4CAF50]' : 'text-gray-400'}`} />
+                        </label>
+
+                        <label className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${billingOption === 'online' ? 'border-[#4CAF50] bg-green-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 ${billingOption === 'online' ? 'border-[#4CAF50]' : 'border-gray-300'}`}>
+                            {billingOption === 'online' && <div className="w-2.5 h-2.5 bg-[#4CAF50] rounded-full" />}
+                          </div>
+                          <input 
+                            type="radio" 
+                            name="billing" 
+                            value="online" 
+                            checked={billingOption === 'online'}
+                            onChange={() => setBillingOption('online')}
+                            className="hidden"
+                          />
+                          <div className="flex-1">
+                            <span className="block text-sm font-bold text-gray-900">Pay Online</span>
+                            <span className="block text-xs text-gray-500 mt-0.5">UPI, Cards, Netbanking</span>
+                          </div>
+                          <Globe className={`w-6 h-6 ${billingOption === 'online' ? 'text-[#4CAF50]' : 'text-gray-400'}`} />
                         </label>
                       </div>
                     </div>

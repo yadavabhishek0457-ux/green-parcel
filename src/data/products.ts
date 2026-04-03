@@ -108,15 +108,6 @@ export const products: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?auto=format&fit=crop&w=500&q=80',
   },
   {
-    id: '21',
-    name: 'Weekly Veggie Box',
-    category: 'Combos',
-    quantity: '5 kg Assorted',
-    mrp: 500,
-    greenPrice: 449,
-    imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=500&q=80',
-  },
-  {
     id: '18',
     name: 'Pomegranate',
     category: 'Fruits',
