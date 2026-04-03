@@ -50,14 +50,18 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
 
   const handlePlaceOrder = () => {
     const phoneNumber = "919770883796";
-    let message = "📦 *New Order from Green Parcel Website*%0A%0A";
+    let message = "📦 *NEW ORDER CONFIRMED*%0A%0A";
+    
     message += "*Order Details:*%0A";
     cartItems.forEach(item => {
       message += `• ${item.cartQuantity}x ${item.name} (${item.quantity}) - ₹${item.greenPrice * item.cartQuantity}%0A`;
     });
+    
     message += `%0A💰 *Total Amount:* ₹${finalTotal}%0A`;
     message += `📍 *Delivery Address:*%0A${address}%0A`;
     message += `💳 *Payment Method:* ${billingOption.toUpperCase()}%0A`;
+    message += `⏳ *Payment Status:* PENDING (COD)%0A`;
+    
     message += `%0A_Quality wahi, jo ek Maa chunti hai._`;
     
     window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
@@ -147,6 +151,7 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                   </motion.div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Order Successful!</h3>
                   <p className="text-gray-600 mb-8">Your fresh groceries will be delivered soon.</p>
+                  
                   <button 
                     onClick={handleClose}
                     className="bg-[#4CAF50] text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-green-600 transition-colors shadow-md"
@@ -194,28 +199,6 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                             className="w-4 h-4 text-green-600 focus:ring-green-500"
                           />
                           <span className="ml-3 text-sm font-medium text-gray-700">Cash on Delivery</span>
-                        </label>
-                        <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                          <input 
-                            type="radio" 
-                            name="billing" 
-                            value="card" 
-                            checked={billingOption === 'card'}
-                            onChange={() => setBillingOption('card')}
-                            className="w-4 h-4 text-green-600 focus:ring-green-500"
-                          />
-                          <span className="ml-3 text-sm font-medium text-gray-700">Credit / Debit Card</span>
-                        </label>
-                        <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                          <input 
-                            type="radio" 
-                            name="billing" 
-                            value="upi" 
-                            checked={billingOption === 'upi'}
-                            onChange={() => setBillingOption('upi')}
-                            className="w-4 h-4 text-green-600 focus:ring-green-500"
-                          />
-                          <span className="ml-3 text-sm font-medium text-gray-700">UPI (Google Pay, PhonePe)</span>
                         </label>
                       </div>
                     </div>
