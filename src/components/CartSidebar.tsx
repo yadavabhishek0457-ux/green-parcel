@@ -32,7 +32,6 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
   const [address, setAddress] = useState('');
   const [billingOption, setBillingOption] = useState('upi');
   const [isAgreed, setIsAgreed] = useState(false);
-  const [showUpiModal, setShowUpiModal] = useState(false);
 
   const handleClose = () => {
     onClose();
@@ -60,42 +59,12 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
   };
 
   const handlePlaceOrder = () => {
-    if (billingOption === 'upi') {
-      setShowUpiModal(true);
-      return;
-    }
-    if (billingOption === 'online') {
-      handleRazorpayPayment();
+    if (billingOption === 'online' || billingOption === 'upi') {
+      handleRazorpayPayment(billingOption === 'upi' ? 'upi' : undefined);
       return;
     }
     
     sendWhatsAppOrder('PENDING (COD)');
-  };
-
-  const handleDirectUpiPayment = (app: string) => {
-    // Replace this with your actual merchant UPI ID
-    const upiId = "merchant@upi"; 
-    const merchantName = "Fresh Grocery";
-    const amount = finalTotal;
-    
-    const params = `pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR`;
-    let url = '';
-
-    if (app === 'gpay') url = `tez://upi/pay?${params}`;
-    else if (app === 'phonepe') url = `phonepe://pay?${params}`;
-    else if (app === 'paytm') url = `paytmmp://pay?${params}`;
-    else url = `upi://pay?${params}`;
-
-    // Open the UPI app
-    window.location.href = url;
-    
-    // Close modal and complete order via WhatsApp
-    setShowUpiModal(false);
-    
-    // Wait a brief moment before sending WhatsApp to allow the intent to fire
-    setTimeout(() => {
-      sendWhatsAppOrder(`PENDING (${app.toUpperCase()})`);
-    }, 1000);
   };
 
   const handleRazorpayPayment = (method?: string) => {
@@ -573,63 +542,6 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
               )}
             </AnimatePresence>
           </motion.div>
-
-          {/* UPI App Selection Modal */}
-          <AnimatePresence>
-            {showUpiModal && (
-              <div className="fixed inset-0 bg-black/60 z-[60] flex items-end md:items-center justify-center p-4">
-                <motion.div 
-                  initial={{ opacity: 0, y: 100 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 100 }}
-                  className="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl relative"
-                >
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-bold text-gray-900">Pay via UPI</h3>
-                    <button onClick={() => setShowUpiModal(false)} className="p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-colors">
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <button onClick={() => handleDirectUpiPayment('gpay')} className="w-full flex items-center p-4 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors">
-                      <div className="w-10 h-10 bg-white border border-gray-100 rounded-full flex items-center justify-center shadow-sm mr-4 overflow-hidden">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="GPay" className="w-6 h-6" />
-                      </div>
-                      <span className="font-bold text-gray-800 text-base">Google Pay</span>
-                    </button>
-
-                    <button onClick={() => handleDirectUpiPayment('phonepe')} className="w-full flex items-center p-4 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors">
-                      <div className="w-10 h-10 bg-[#5f259f] rounded-full flex items-center justify-center shadow-sm mr-4">
-                        <span className="text-white font-bold text-xl leading-none">पे</span>
-                      </div>
-                      <span className="font-bold text-gray-800 text-base">PhonePe</span>
-                    </button>
-
-                    <button onClick={() => handleDirectUpiPayment('paytm')} className="w-full flex items-center p-4 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors">
-                      <div className="w-10 h-10 bg-[#00baf2] rounded-full flex items-center justify-center shadow-sm mr-4">
-                        <span className="text-white font-bold text-[10px] tracking-wider">Paytm</span>
-                      </div>
-                      <span className="font-bold text-gray-800 text-base">Paytm</span>
-                    </button>
-
-                    <div className="relative py-2">
-                      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>
-                      <div className="relative flex justify-center"><span className="bg-white px-4 text-xs text-gray-400 uppercase tracking-wider font-medium">Or</span></div>
-                    </div>
-
-                    <button onClick={() => handleDirectUpiPayment('other')} className="w-full flex items-center justify-center p-4 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors">
-                      <span className="font-bold text-gray-700 text-base">Other UPI Apps</span>
-                    </button>
-                  </div>
-                  
-                  <p className="text-center text-xs text-gray-500 mt-5">
-                    You will be redirected to the app to complete the payment securely.
-                  </p>
-                </motion.div>
-              </div>
-            )}
-          </AnimatePresence>
         </>
       )}
     </AnimatePresence>
