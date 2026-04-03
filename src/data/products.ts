@@ -54,15 +54,6 @@ export const products: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=500&q=80',
   },
   {
-    id: '5',
-    name: 'Coriander',
-    category: 'Leafy Greens',
-    quantity: '100g',
-    mrp: 15,
-    greenPrice: 10,
-    imageUrl: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=500&q=80',
-  },
-  {
     id: '6',
     name: 'Banana (Robusta)',
     category: 'Fruits',

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Truck, Clock, ShieldCheck, Leaf } from 'lucide-react';
+import { Truck, Clock, ShieldCheck, Leaf, Search, X } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { HeroBanner } from './components/HeroBanner';
 import { AboutUs } from './components/AboutUs';
@@ -15,6 +15,7 @@ import { products, Product, Review } from './data/products';
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<Record<string, number>>({});
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -32,9 +33,22 @@ export default function App() {
   }, []);
 
   const filteredProducts = useMemo(() => {
-    if (selectedCategory === 'All') return products;
-    return products.filter(p => p.category === selectedCategory);
-  }, [selectedCategory]);
+    let filtered = products;
+    
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(p => p.category === selectedCategory);
+    }
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        p.category.toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered;
+  }, [selectedCategory, searchQuery]);
 
   const handleAddToCart = (product: Product) => {
     setCart(prev => ({
@@ -91,6 +105,27 @@ export default function App() {
       <main className="pb-24">
         <HeroBanner />
         
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-10 mb-10">
+          <div className="bg-white rounded-2xl shadow-lg p-2 flex items-center border border-gray-100">
+            <Search className="w-6 h-6 text-gray-400 ml-3" />
+            <input 
+              type="text" 
+              placeholder="Search for fresh vegetables, fruits..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 text-gray-700 focus:outline-none bg-transparent font-medium"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </div>
+        
         <CategoryNav 
           categories={categories} 
           selectedCategory={selectedCategory} 
@@ -100,9 +135,9 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-              {selectedCategory === 'All' ? 'Daily Deals' : selectedCategory}
+              {searchQuery ? 'Search Results' : (selectedCategory === 'All' ? 'Daily Deals' : selectedCategory)}
             </h2>
-            {selectedCategory === 'All' && (
+            {!searchQuery && selectedCategory === 'All' && (
               <span className="bg-amber-100 text-amber-700 px-4 py-1 rounded-full text-sm font-bold animate-pulse">
                 Limited Time Offers!
               </span>
@@ -111,27 +146,44 @@ export default function App() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
-            {filteredProducts.map(product => {
-              const productReviews = reviews[product.id] || [];
-              const averageRating = productReviews.length > 0 
-                ? productReviews.reduce((acc, r) => acc + r.rating, 0) / productReviews.length 
-                : 0;
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-20 bg-gray-50 rounded-2xl border border-gray-100">
+              <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-800 mb-2">No products found</h3>
+              <p className="text-gray-500">We couldn't find anything matching "{searchQuery}". Try a different search term.</p>
+              <button 
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('All');
+                }}
+                className="mt-6 bg-[#4CAF50] text-white px-6 py-2 rounded-lg font-medium hover:bg-green-600 transition-colors"
+              >
+                Clear Search
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+              {filteredProducts.map(product => {
+                const productReviews = reviews[product.id] || [];
+                const averageRating = productReviews.length > 0 
+                  ? productReviews.reduce((acc, r) => acc + r.rating, 0) / productReviews.length 
+                  : 0;
 
-              return (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  cartQuantity={cart[product.id] || 0}
-                  onAddToCart={handleAddToCart}
-                  onRemoveFromCart={handleRemoveFromCart}
-                  onProductClick={setSelectedProduct}
-                  averageRating={averageRating}
-                  reviewCount={productReviews.length}
-                />
-              );
-            })}
-          </div>
+                return (
+                  <ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    cartQuantity={cart[product.id] || 0}
+                    onAddToCart={handleAddToCart}
+                    onRemoveFromCart={handleRemoveFromCart}
+                    onProductClick={setSelectedProduct}
+                    averageRating={averageRating}
+                    reviewCount={productReviews.length}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <TrustBadges />

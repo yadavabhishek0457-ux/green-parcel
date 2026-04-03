@@ -80,6 +80,7 @@ export function ProductModal({
                   src={product.imageUrl} 
                   alt={product.name} 
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div className="p-6 flex-1 flex flex-col">
