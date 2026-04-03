@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Plus, Minus, ShoppingBag, MapPin, CreditCard, ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, MapPin, CreditCard, ArrowLeft, CheckCircle2, ShieldCheck, User, Phone, Banknote, Receipt } from 'lucide-react';
 import { Product } from '../data/products';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -21,6 +21,8 @@ type CheckoutStep = 'cart' | 'checkout' | 'success';
 
 export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveFromCart, onClearCart, onPolicyClick }: CartSidebarProps) {
   const [step, setStep] = useState<CheckoutStep>('cart');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [address, setAddress] = useState('');
   const [billingOption, setBillingOption] = useState('cod');
   const [isAgreed, setIsAgreed] = useState(false);
@@ -31,6 +33,8 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
       setStep('cart');
       if (step === 'success') {
         onClearCart();
+        setCustomerName('');
+        setCustomerPhone('');
         setAddress('');
         setBillingOption('cod');
         setIsAgreed(false);
@@ -52,13 +56,17 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
     const phoneNumber = "919770883796";
     let message = "📦 *NEW ORDER CONFIRMED*%0A%0A";
     
+    message += "*Customer Details:*%0A";
+    message += `👤 Name: ${customerName}%0A`;
+    message += `📞 Phone: ${customerPhone}%0A`;
+    message += `📍 Address: ${address}%0A%0A`;
+
     message += "*Order Details:*%0A";
     cartItems.forEach(item => {
       message += `• ${item.cartQuantity}x ${item.name} (${item.quantity}) - ₹${item.greenPrice * item.cartQuantity}%0A`;
     });
     
     message += `%0A💰 *Total Amount:* ₹${finalTotal}%0A`;
-    message += `📍 *Delivery Address:*%0A${address}%0A`;
     message += `💳 *Payment Method:* ${billingOption.toUpperCase()}%0A`;
     message += `⏳ *Payment Status:* PENDING (COD)%0A`;
     
@@ -167,60 +175,128 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                   exit={{ opacity: 0, x: -20 }}
                   className="flex-1 flex flex-col overflow-hidden"
                 >
-                  <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                    {/* Address Section */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                        <MapPin className="w-4 h-4 mr-2 text-[#4CAF50]" />
-                        Delivery Address
+                  <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-gray-50/50">
+                    {/* Mini Order Summary */}
+                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                      <h3 className="font-bold text-gray-800 mb-3 flex items-center text-sm uppercase tracking-wider">
+                        <Receipt className="w-4 h-4 mr-2 text-[#4CAF50]" />
+                        Order Summary
                       </h3>
-                      <textarea 
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        placeholder="Enter your full delivery address..."
-                        className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none h-24"
-                      />
+                      <div className="flex gap-3 overflow-x-auto pb-2 snap-x hide-scrollbar">
+                        {cartItems.map(item => (
+                          <div key={item.id} className="snap-start shrink-0 w-16 flex flex-col items-center">
+                            <div className="relative w-14 h-14 bg-gray-50 rounded-xl border border-gray-100 p-1 mb-1">
+                              <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover rounded-lg" />
+                              <span className="absolute -top-2 -right-2 bg-[#4CAF50] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+                                {item.cartQuantity}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-gray-500 truncate w-full text-center">{item.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Delivery Details Section */}
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                      <h3 className="font-bold text-gray-800 mb-4 flex items-center text-sm uppercase tracking-wider">
+                        <MapPin className="w-4 h-4 mr-2 text-[#4CAF50]" />
+                        Delivery Details
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <User className="h-4 w-4 text-gray-400" />
+                          </div>
+                          <input 
+                            type="text"
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
+                            placeholder="Full Name"
+                            className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-colors"
+                          />
+                        </div>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Phone className="h-4 w-4 text-gray-400" />
+                          </div>
+                          <input 
+                            type="tel"
+                            value={customerPhone}
+                            onChange={(e) => setCustomerPhone(e.target.value)}
+                            placeholder="Phone Number"
+                            className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-colors"
+                          />
+                        </div>
+                        <div className="relative">
+                          <textarea 
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                            placeholder="Complete Delivery Address (House No, Building, Street, Area)"
+                            className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none h-24 bg-gray-50 focus:bg-white transition-colors"
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     {/* Billing Option Section */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                      <h3 className="font-bold text-gray-800 mb-4 flex items-center text-sm uppercase tracking-wider">
                         <CreditCard className="w-4 h-4 mr-2 text-[#4CAF50]" />
                         Payment Method
                       </h3>
                       <div className="space-y-3">
-                        <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <label className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${billingOption === 'cod' ? 'border-[#4CAF50] bg-green-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 ${billingOption === 'cod' ? 'border-[#4CAF50]' : 'border-gray-300'}`}>
+                            {billingOption === 'cod' && <div className="w-2.5 h-2.5 bg-[#4CAF50] rounded-full" />}
+                          </div>
                           <input 
                             type="radio" 
                             name="billing" 
                             value="cod" 
                             checked={billingOption === 'cod'}
                             onChange={() => setBillingOption('cod')}
-                            className="w-4 h-4 text-green-600 focus:ring-green-500"
+                            className="hidden"
                           />
-                          <span className="ml-3 text-sm font-medium text-gray-700">Cash on Delivery</span>
+                          <div className="flex-1">
+                            <span className="block text-sm font-bold text-gray-900">Cash on Delivery</span>
+                            <span className="block text-xs text-gray-500 mt-0.5">Pay when your order arrives</span>
+                          </div>
+                          <Banknote className={`w-6 h-6 ${billingOption === 'cod' ? 'text-[#4CAF50]' : 'text-gray-400'}`} />
                         </label>
                       </div>
                     </div>
                   </div>
 
                   {/* Place Order Footer */}
-                  <div className="bg-white border-t p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-                    <div className="flex justify-between font-bold text-lg text-gray-900 mb-4">
-                      <span>Total to Pay</span>
-                      <span>₹{finalTotal}</span>
+                  <div className="bg-white border-t p-5 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] z-10">
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between text-sm text-gray-500">
+                        <span>Item Total</span>
+                        <span>₹{itemTotal}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-500">
+                        <span>Delivery Fee</span>
+                        <span className={deliveryFee === 0 ? "text-green-600 font-medium" : ""}>
+                          {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}
+                        </span>
+                      </div>
+                      <div className="border-t border-dashed border-gray-200 pt-2 mt-2 flex justify-between font-black text-xl text-gray-900">
+                        <span>To Pay</span>
+                        <span className="text-[#4CAF50]">₹{finalTotal}</span>
+                      </div>
                     </div>
 
                     {/* Trust Badge */}
-                    <div className="flex items-center justify-center gap-2 mb-4 bg-green-50 py-2 rounded-lg border border-green-100">
+                    <div className="flex items-center justify-center gap-2 mb-4 bg-green-50/80 py-2.5 rounded-xl border border-green-100/50">
                       <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                      <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">100% Freshness Guaranteed or Money Back</span>
+                      <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">100% Freshness Guaranteed</span>
                     </div>
 
                     {/* Policy Agreement */}
-                    <div className="mb-4">
+                    <div className="mb-5">
                       <label className="flex items-start cursor-pointer group">
-                        <div className="relative flex items-center">
+                        <div className="relative flex items-center mt-0.5">
                           <input 
                             type="checkbox" 
                             checked={isAgreed}
@@ -237,8 +313,8 @@ export function CartSidebar({ isOpen, onClose, cartItems, onAddToCart, onRemoveF
                     <div className="space-y-3">
                       <button 
                         onClick={handlePlaceOrder}
-                        disabled={!address.trim() || !isAgreed}
-                        className="w-full bg-[#4CAF50] text-white py-3 rounded-xl font-bold text-lg hover:bg-green-600 transition-colors shadow-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={!customerName.trim() || !customerPhone.trim() || !address.trim() || !isAgreed}
+                        className="w-full bg-gradient-to-r from-[#4CAF50] to-emerald-600 text-white py-4 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/30 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transform active:scale-[0.98]"
                       >
                         Confirm & Place Order
                       </button>
